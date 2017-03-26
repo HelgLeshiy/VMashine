@@ -6,6 +6,8 @@
 #include <cstdlib>
 #include <cstring>
 
+#include "../global/defines.h"
+
 const int MAXSIZE = 5000;
 
 class Translator
@@ -13,6 +15,30 @@ class Translator
 public:
     Translator();
     void translate(const std::string &infile, const std::string &outfile);
+    void printBCode();
+
+private:
+    void cmdMov(std::vector<std::string> &args, int &cur);
+    void cmdPass(std::vector<std::string> &args, int &cur);
+    void cmdInt(std::vector<std::string> &args, int &cur);
+    void cmdAdd(std::vector<std::string> &args, int &cur);
+    void cmdSub(std::vector<std::string> &args, int &cur);
+    void cmdMul(std::vector<std::string> &args, int &cur);
+    void cmdDiv(std::vector<std::string> &args, int &cur);
+    void cmdJmp(std::vector<std::string> &args, int &cur);
+    void cmdJe(std::vector<std::string> &args, int &cur);
+    void cmdJg(std::vector<std::string> &args, int &cur);
+    void cmdJl(std::vector<std::string> &args, int &cur);
+    void cmdJne(std::vector<std::string> &args, int &cur);
+    void cmdCmp(std::vector<std::string> &args, int &cur);
+    void cmdPush(std::vector<std::string> &args, int &cur);
+    void cmdPop(std::vector<std::string> &args, int &cur);
+    void cmdCall(std::vector<std::string> &args, int &cur);
+    void cmdRet(std::vector<std::string> &args, int &cur);
+    void cmdAnd(std::vector<std::string> &args, int &cur);
+    void cmdOr(std::vector<std::string> &args, int &cur);
+    void cmdXor(std::vector<std::string> &args, int &cur);
+    void cmdNot(std::vector<std::string> &args, int &cur);
 
 private:
     void initRegs();
@@ -178,6 +204,491 @@ void Translator::putFloatRegister(const std::string &reg, int &cur)
     cur+=sizeof(unsigned char);
 }
 
+void Translator::cmdMov(std::vector<std::string> &args, int &cur)
+{
+    if(args.size() != 3)
+        error(curline, "Syntax error");
+
+    if(isNumber(args[1]))
+    {
+        if(isRegister(args[2]))
+        {
+            putByte(OP_MOV_1, cur);
+            putNumber(args[1], cur);
+            putRegister(args[2], cur);
+        }
+        else if(isMemory(args[2]))
+        {
+            if(isNumber(args[2]))
+            {
+                putByte(OP_MOV_2, cur);
+                putNumber(args[1], cur);
+                putNumber(args[2], cur);
+            }
+            else if(isRegister(args[2]))
+            {
+                putByte(OP_MOV_3, cur);
+                putNumber(args[1], cur);
+                putRegister(args[2], cur);
+            }
+            else
+            {
+                error(curline, "Syntax error");
+            }
+        }
+        else
+        {
+            error(curline, "Syntax error");
+        }
+    }
+    else if(isFloat(args[1]))
+    {
+        if(isFloatRegister(args[2]))
+        {
+            putByte(OP_MOV_4, cur);
+            putFloat(args[1], cur);
+            putFloatRegister(args[2], cur);
+        }
+        else if(isMemory(args[2]))
+        {
+            if(isNumber(args[2]))
+            {
+                putByte(OP_MOV_5, cur);
+                putFloat(args[1], cur);
+                putNumber(args[2], cur);
+            }
+            else if(isFloatRegister(args[2]))
+            {
+                putByte(OP_MOV_6, cur);
+                putFloat(args[1], cur);
+                putFloatRegister(args[2], cur);
+            }
+            else
+            {
+                error(curline, "Syntax error");
+            }
+        }
+        else
+        {
+            error(curline, "Syntax error");
+        }
+    }
+    else if(isRegister(args[1]))
+    {
+        if(isRegister(args[2]))
+        {
+            putByte(OP_MOV_7, cur);
+            putRegister(args[1], cur);
+            putRegister(args[2], cur);
+        }
+        else if(isMemory(args[2]))
+        {
+            if(isNumber(args[2]))
+            {
+                putByte(OP_MOV_8, cur);
+                putRegister(args[1], cur);
+                putNumber(args[2], cur);
+            }
+            else if(isRegister(args[2]))
+            {
+                putByte(OP_MOV_9, cur);
+                putRegister(args[1], cur);
+                putRegister(args[2], cur);
+            }
+            else
+            {
+                error(curline, "Syntax error");
+            }
+        }
+        else if(isFloatRegister(args[2]))
+        {
+            putByte(OP_MOV_17, cur);
+            putRegister(args[1], cur);
+            putFloatRegister(args[2], cur);
+        }
+        else
+        {
+            error(curline, "Syntax error");
+        }
+    }
+    else if(isFloatRegister(args[1]))
+    {
+        if(isFloatRegister(args[2]))
+        {
+            putByte(OP_MOV_10, cur);
+            putFloatRegister(args[1], cur);
+            putFloatRegister(args[2], cur);
+        }
+        else if(isMemory(args[2]))
+        {
+            if(isNumber(args[2]))
+            {
+                putByte(OP_MOV_11, cur);
+                putFloatRegister(args[1], cur);
+                putNumber(args[2], cur);
+            }
+            else if(isFloatRegister(args[2]))
+            {
+                putByte(OP_MOV_12, cur);
+                putFloatRegister(args[1], cur);
+                putFloatRegister(args[2], cur);
+            }
+            else
+            {
+                error(curline, "Syntax error");
+            }
+        }
+        else if(isRegister(args[2]))
+        {
+            putByte(OP_MOV_18, cur);
+            putFloatRegister(args[1], cur);
+            putRegister(args[2], cur);
+        }
+        else
+        {
+            error(curline, "Syntax error");
+        }
+    }
+    else if(isMemory(args[1]))
+    {
+        if(isNumber(args[1]))
+        {
+            if(isRegister(args[2]))
+            {
+                putByte(OP_MOV_13, cur);
+                putNumber(args[1], cur);
+                putRegister(args[2], cur);
+            }
+            else if(isFloatRegister(args[2]))
+            {
+                putByte(OP_MOV_14, cur);
+                putNumber(args[1], cur);
+                putFloatRegister(args[2], cur);
+            }
+            else
+            {
+                error(curline, "Syntax error");
+            }
+        }
+        else if(isRegister(args[1]))
+        {
+            if(isRegister(args[2]))
+            {
+                putByte(OP_MOV_15, cur);
+                putRegister(args[1], cur);
+                putRegister(args[2], cur);
+            }
+            else if(isFloatRegister(args[2]))
+            {
+                putByte(OP_MOV_16, cur);
+                putRegister(args[1], cur);
+                putFloatRegister(args[2], cur);
+            }
+            else
+            {
+                error(curline, "Syntax error");
+            }
+        }
+        else
+        {
+            error(curline, "Syntax error");
+        }
+    }
+    else
+    {
+        error(curline, "Syntax error");
+    }
+}
+
+void Translator::cmdPass(std::vector<std::string> &args, int &cur)
+{
+    putByte(OP_PASS, cur);
+}
+
+void Translator::cmdInt(std::vector<std::string> &args, int &cur)
+{
+    if(args.size()!=2)
+        error(curline, "Syntax error");
+
+    if(!isNumber(args[1]))
+        error(curline, "Syntax error");
+
+    putByte(OP_INT, cur);
+    putNumber(args[1], cur);
+}
+
+void Translator::cmdAdd(std::vector<std::string> &args, int &cur)
+{
+    if(args.size() != 3)
+        error(curline, "Syntax error");
+
+    if(isNumber(args[1]) && isRegister(args[2]))
+    {
+        putByte(OP_ADD_1, cur);
+        putNumber(args[1], cur);
+        putRegister(args[2], cur);
+    }
+    else if(isRegister(args[1]) && isRegister(args[2]))
+    {
+        putByte(OP_ADD_2, cur);
+        putRegister(args[1], cur);
+        putRegister(args[2], cur);
+    }
+    else if(isFloat(args[1]) && isFloatRegister(args[2]))
+    {
+        putByte(OP_ADD_3, cur);
+        putFloat(args[1], cur);
+        putFloatRegister(args[2], cur);
+    }
+    else if(isFloatRegister(args[1]) && isFloatRegister(args[2]))
+    {
+        putByte(OP_ADD_4, cur);
+        putFloatRegister(args[1], cur);
+        putFloatRegister(args[2], cur);
+    }
+    else
+    {
+        error(curline, "Syntax error");
+    }
+}
+
+void Translator::cmdSub(std::vector<std::string> &args, int &cur)
+{
+    if(args.size() != 3)
+        error(curline, "Syntax error");
+
+    if(isNumber(args[1]) && isRegister(args[2]))
+    {
+        putByte(OP_SUB_1, cur);
+        putNumber(args[1], cur);
+        putRegister(args[2], cur);
+    }
+    else if(isRegister(args[1]) && isRegister(args[2]))
+    {
+        putByte(OP_SUB_2, cur);
+        putRegister(args[1], cur);
+        putRegister(args[2], cur);
+    }
+    else if(isFloat(args[1]) && isFloatRegister(args[2]))
+    {
+        putByte(OP_SUB_3, cur);
+        putFloat(args[1], cur);
+        putFloatRegister(args[2], cur);
+    }
+    else if(isFloatRegister(args[1]) && isFloatRegister(args[2]))
+    {
+        putByte(OP_SUB_4, cur);
+        putFloatRegister(args[1], cur);
+        putFloatRegister(args[2], cur);
+    }
+    else
+    {
+        error(curline, "Syntax error");
+    }
+}
+
+void Translator::cmdMul(std::vector<std::string> &args, int &cur)
+{
+    if(args.size() != 2)
+        error(curline, "Syntax error");
+
+    if(isNumber(args[1]))
+    {
+        putByte(OP_MUL_1, cur);
+        putNumber(args[1], cur);
+    }
+    else if(isRegister(args[1]))
+    {
+        putByte(OP_MUL_2, cur);
+        putRegister(args[1], cur);
+    }
+    else if(isFloat(args[1]))
+    {
+        putByte(OP_MUL_3, cur);
+        putFloat(args[1], cur);
+    }
+    else if(isFloatRegister(args[1]))
+    {
+        putByte(OP_MUL_4, cur);
+        putFloatRegister(args[1], cur);
+    }
+    else
+        error(curline, "Syntax error");
+}
+
+void Translator::cmdDiv(std::vector<std::string> &args, int &cur)
+{
+    if(args.size() != 2)
+        error(curline, "Syntax error");
+
+    if(isNumber(args[1]))
+    {
+        putByte(OP_DIV_1, cur);
+        putNumber(args[1], cur);
+    }
+    else if(isRegister(args[1]))
+    {
+        putByte(OP_DIV_2, cur);
+        putRegister(args[1], cur);
+    }
+    else if(isFloat(args[1]))
+    {
+        putByte(OP_DIV_3, cur);
+        putFloat(args[1], cur);
+    }
+    else if(isFloatRegister(args[1]))
+    {
+        putByte(OP_DIV_4, cur);
+        putFloatRegister(args[1], cur);
+    }
+    else
+        error(curline, "Syntax error");
+}
+
+void Translator::cmdJmp(std::vector<std::string> &args, int &cur)
+{
+    if(args.size() != 2)
+        error(curline, "Syntax error");
+
+    if(isNumber(args[1]))
+    {
+        putByte(OP_JMP_1, cur);
+        putNumber(args[1], cur);
+    }
+    else
+        error(curline, "Syntax error");
+}
+
+void Translator::cmdJe(std::vector<std::string> &args, int &cur)
+{
+    if(args.size() != 2)
+        error(curline, "Syntax error");
+
+    if(isNumber(args[1]))
+    {
+        putByte(OP_JE_1, cur);
+        putNumber(args[1], cur);
+    }
+    else
+        error(curline, "Syntax error");
+}
+
+void Translator::cmdJg(std::vector<std::string> &args, int &cur)
+{
+    if(args.size() != 2)
+        error(curline, "Syntax error");
+
+    if(isNumber(args[1]))
+    {
+        putByte(OP_JG_1, cur);
+        putNumber(args[1], cur);
+    }
+    else
+        error(curline, "Syntax error");
+}
+
+void Translator::cmdJl(std::vector<std::string> &args, int &cur)
+{
+    if(args.size() != 2)
+        error(curline, "Syntax error");
+
+    if(isNumber(args[1]))
+    {
+        putByte(OP_JL_1, cur);
+        putNumber(args[1], cur);
+    }
+    else
+        error(curline, "Syntax error");
+}
+
+void Translator::cmdJne(std::vector<std::string> &args, int &cur)
+{
+    if(args.size() != 2)
+        error(curline, "Syntax error");
+
+    if(isNumber(args[1]))
+    {
+        putByte(OP_JNE_1, cur);
+        putNumber(args[1], cur);
+    }
+    else
+        error(curline, "Syntax error");
+}
+
+void Translator::cmdCmp(std::vector<std::string> &args, int &cur)
+{
+    if(args.size() != 3)
+        error(curline, "Syntax error");
+
+    if(isNumber(args[1]) && isRegister(args[2]))
+    {
+        putByte(OP_CMP_1, cur);
+        putNumber(args[1], cur);
+        putRegister(args[2], cur);
+    }
+    else if(isRegister(args[1]) && isRegister(args[2]))
+    {
+        putByte(OP_CMP_2, cur);
+        putRegister(args[1], cur);
+        putRegister(args[2], cur);
+    }
+    else if(isFloat(args[1]) && isFloatRegister(args[2]))
+    {
+        putByte(OP_CMP_3, cur);
+        putFloat(args[1], cur);
+        putFloatRegister(args[2], cur);
+    }
+    else if(isFloatRegister(args[1]) && isFloatRegister(args[2]))
+    {
+        putByte(OP_CMP_4, cur);
+        putFloatRegister(args[1], cur);
+        putFloatRegister(args[2], cur);
+    }
+    else
+        error(curline, "Syntax error");
+}
+
+void Translator::cmdPush(std::vector<std::string> &args, int &cur)
+{
+
+}
+
+void Translator::cmdPop(std::vector<std::string> &args, int &cur)
+{
+
+}
+
+void Translator::cmdCall(std::vector<std::string> &args, int &cur)
+{
+
+}
+
+void Translator::cmdRet(std::vector<std::string> &args, int &cur)
+{
+
+}
+
+void Translator::cmdAnd(std::vector<std::string> &args, int &cur)
+{
+
+}
+
+void Translator::cmdOr(std::vector<std::string> &args, int &cur)
+{
+
+}
+
+void Translator::cmdXor(std::vector<std::string> &args, int &cur)
+{
+
+}
+
+void Translator::cmdNot(std::vector<std::string> &args, int &cur)
+{
+
+}
+
+
 void Translator::translate(const std::string &infile, const std::string &outfile)
 {
     std::ifstream source(infile.c_str());
@@ -199,295 +710,48 @@ void Translator::translate(const std::string &infile, const std::string &outfile
         curline++;
 
         if(args[0] == "pass")
-        {
-            putByte(19, cur);
-        }
+            cmdPass(args, cur);
         else if(args[0] == "mov")
-        {
-            if(args.size() != 3)
-                error(curline, "Syntax error");
-
-            if(isNumber(args[1]))
-            {
-                if(isRegister(args[2]))
-                {
-                    putByte(1, cur);
-                    putNumber(args[1], cur);
-                    putRegister(args[2], cur);
-                }
-                else if(isMemory(args[2]))
-                {
-                    if(isNumber(args[2]))
-                    {
-                        putByte(2, cur);
-                        putNumber(args[1], cur);
-                        putNumber(args[2], cur);
-                    }
-                    else if(isRegister(args[2]))
-                    {
-                        putByte(3, cur);
-                        putNumber(args[1], cur);
-                        putRegister(args[2], cur);
-                    }
-                    else
-                    {
-                        error(curline, "Syntax error");
-                    }
-                }
-                else
-                {
-                    error(curline, "Syntax error");
-                }
-            }
-            else if(isFloat(args[1]))
-            {
-                if(isFloatRegister(args[2]))
-                {
-                    putByte(4, cur);
-                    putFloat(args[1], cur);
-                    putFloatRegister(args[2], cur);
-                }
-                else if(isMemory(args[2]))
-                {
-                    if(isNumber(args[2]))
-                    {
-                        putByte(5, cur);
-                        putFloat(args[1], cur);
-                        putNumber(args[2], cur);
-                    }
-                    else if(isFloatRegister(args[2]))
-                    {
-                        putByte(6, cur);
-                        putFloat(args[1], cur);
-                        putFloatRegister(args[2], cur);
-                    }
-                    else
-                    {
-                        error(curline, "Syntax error");
-                    }
-                }
-                else
-                {
-                    error(curline, "Syntax error");
-                }
-            }
-            else if(isRegister(args[1]))
-            {
-                if(isRegister(args[2]))
-                {
-                    putByte(7, cur);
-                    putRegister(args[1], cur);
-                    putRegister(args[2], cur);
-                }
-                else if(isMemory(args[2]))
-                {
-                    if(isNumber(args[2]))
-                    {
-                        putByte(8, cur);
-                        putRegister(args[1], cur);
-                        putNumber(args[2], cur);
-                    }
-                    else if(isRegister(args[2]))
-                    {
-                        putByte(9, cur);
-                        putRegister(args[1], cur);
-                        putRegister(args[2], cur);
-                    }
-                    else
-                    {
-                        error(curline, "Syntax error");
-                    }
-                }
-                else if(isFloatRegister(args[2]))
-                {
-                    putByte(17, cur);
-                    putRegister(args[1], cur);
-                    putFloatRegister(args[2], cur);
-                }
-                else
-                {
-                    error(curline, "Syntax error");
-                }
-            }
-            else if(isFloatRegister(args[1]))
-            {
-                if(isFloatRegister(args[2]))
-                {
-                    putByte(10, cur);
-                    putFloatRegister(args[1], cur);
-                    putFloatRegister(args[2], cur);
-                }
-                else if(isMemory(args[2]))
-                {
-                    if(isNumber(args[2]))
-                    {
-                        putByte(11, cur);
-                        putFloatRegister(args[1], cur);
-                        putNumber(args[2], cur);
-                    }
-                    else if(isFloatRegister(args[2]))
-                    {
-                        putByte(12, cur);
-                        putFloatRegister(args[1], cur);
-                        putFloatRegister(args[2], cur);
-                    }
-                    else
-                    {
-                        error(curline, "Syntax error");
-                    }
-                }
-                else if(isRegister(args[2]))
-                {
-                    putByte(18, cur);
-                    putFloatRegister(args[1], cur);
-                    putRegister(args[2], cur);
-                }
-                else
-                {
-                    error(curline, "Syntax error");
-                }
-            }
-            else if(isMemory(args[1]))
-            {
-                if(isNumber(args[1]))
-                {
-                    if(isRegister(args[2]))
-                    {
-                        putByte(13, cur);
-                        putNumber(args[1], cur);
-                        putRegister(args[2], cur);
-                    }
-                    else if(isFloatRegister(args[2]))
-                    {
-                        putByte(14, cur);
-                        putNumber(args[1], cur);
-                        putFloatRegister(args[2], cur);
-                    }
-                    else
-                    {
-                        error(curline, "Syntax error");
-                    }
-                }
-                else if(isRegister(args[1]))
-                {
-                    if(isRegister(args[2]))
-                    {
-                        putByte(15, cur);
-                        putRegister(args[1], cur);
-                        putRegister(args[2], cur);
-                    }
-                    else if(isFloatRegister(args[2]))
-                    {
-                        putByte(16, cur);
-                        putRegister(args[1], cur);
-                        putFloatRegister(args[2], cur);
-                    }
-                    else
-                    {
-                        error(curline, "Syntax error");
-                    }
-                }
-                else
-                {
-                    error(curline, "Syntax error");
-                }
-            }
-            else
-            {
-                error(curline, "Syntax error");
-            }
-        }
+            cmdMov(args, cur);
         else if(args[0] == "int")
-        {
-            if(args.size()!=2)
-                error(curline, "Syntax error");
-
-            if(!isNumber(args[1]))
-                error(curline, "Syntax error");
-
-            putByte(20, cur);
-            putNumber(args[1], cur);
-        }
+            cmdInt(args, cur);
         else if(args[0] == "add")
-        {
-            if(args.size() != 3)
-                error(curline, "Syntax error");
-
-            if(isNumber(args[1]) && isRegister(args[2]))
-            {
-                putByte(22, cur);
-                putNumber(args[1], cur);
-                putRegister(args[2], cur);
-            }
-            else if(isRegister(args[1]) && isRegister(args[2]))
-            {
-                putByte(23, cur);
-                putRegister(args[1], cur);
-                putRegister(args[2], cur);
-            }
-            else if(isFloat(args[1]) && isFloatRegister(args[2]))
-            {
-                putByte(24, cur);
-                putFloat(args[1], cur);
-                putFloatRegister(args[2], cur);
-            }
-            else if(isFloatRegister(args[1]) && isFloatRegister(args[2]))
-            {
-                putByte(25, cur);
-                putFloatRegister(args[1], cur);
-                putFloatRegister(args[2], cur);
-            }
-            else
-            {
-                error(curline, "Syntax error");
-            }
-        }
+            cmdAdd(args, cur);
         else if(args[0] == "sub")
-        {
-            if(args.size() != 3)
-                error(curline, "Syntax error");
-
-            if(isNumber(args[1]) && isRegister(args[2]))
-            {
-                putByte(26, cur);
-                putNumber(args[1], cur);
-                putRegister(args[2], cur);
-            }
-            else if(isRegister(args[1]) && isRegister(args[2]))
-            {
-                putByte(27, cur);
-                putRegister(args[1], cur);
-                putRegister(args[2], cur);
-            }
-            else if(isFloat(args[1]) && isFloatRegister(args[2]))
-            {
-                putByte(28, cur);
-                putFloat(args[1], cur);
-                putFloatRegister(args[2], cur);
-            }
-            else if(isFloatRegister(args[1]) && isFloatRegister(args[2]))
-            {
-                putByte(29, cur);
-                putFloatRegister(args[1], cur);
-                putFloatRegister(args[2], cur);
-            }
-            else
-            {
-                error(curline, "Syntax error");
-            }
-        }
+            cmdSub(args, cur);
+        else if(args[0] == "mul")
+            cmdMul(args, cur);
+        else if(args[0] == "div")
+            cmdDiv(args, cur);
+        else if(args[0] == "jmp")
+            cmdJmp(args, cur);
+        else if(args[0] == "je")
+            cmdJe(args, cur);
+        else if(args[0] == "jg")
+            cmdJg(args, cur);
+        else if(args[0] == "jl")
+            cmdJl(args, cur);
+        else if(args[0] == "jne")
+            cmdJne(args, cur);
+        else if(args[0] == "cmp")
+            cmdCmp(args, cur);
         else
-            error(curline, "Syntax error");
+            error(curline, std::string("Unknown command!") + args[0]);
     }
 
     source.close();
 
-    for(int i = 0; i < cur; i++)
-        std::cout << i << '\t' << (int)bcode[i] << std::endl;
-
     std::ofstream fout(outfile.c_str(), std::ios::binary);
     fout.write((char*)bcode, cur);
     fout.close();
+}
+
+void Translator::printBCode()
+{
+    for(int i = 0; i < cur; ++i)
+    {
+        std::cout << (int)bcode[i] << ' ';
+    }
 }
 
 int main(int argc, char *argv[])
@@ -505,6 +769,12 @@ int main(int argc, char *argv[])
 
     Translator mAsm;
     mAsm.translate(argv[1], argv[2]);
+
+    if(argc == 4)
+    {
+        if(strcmp(argv[3], "-p") == 0)
+            mAsm.printBCode();
+    }
 
     return 0;
 }

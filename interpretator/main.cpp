@@ -4,6 +4,8 @@
 #include <cstring>
 #include <cstdlib>
 
+#include "../global/defines.h"
+
 const int CORESIZE = 8000;
 const int INT_REGS_COUNT = 7;
 const int FLOAT_REGS_COUNT = 6;
@@ -65,17 +67,17 @@ void VMashine::execute()
     {
         switch(memory[pc])
         {
-        case 19:
+        case OP_PASS:
             break;
 
-        case 20:
+        case OP_INT:
         {
             short intCode = *((short*)(memory+pc+1));
             interrupt(intCode);
             pc+=2;
         } break;
 
-        case 1:
+        case OP_MOV_1:
         {
             short num = *((short*)(memory+pc+1));
             size_t reg = *(memory+pc+3);
@@ -83,7 +85,7 @@ void VMashine::execute()
             pc+=3;
         } break;
 
-        case 2:
+        case OP_MOV_2:
         {
             short num = *((short*)(memory+pc+1));
             short addr = *((short*)(memory+pc+3));
@@ -91,7 +93,7 @@ void VMashine::execute()
             pc+=4;
         } break;
 
-        case 3:
+        case OP_MOV_3:
         {
             short num = *((short*)(memory+pc+1));
             size_t reg = *(memory+pc+3);
@@ -100,7 +102,7 @@ void VMashine::execute()
             pc+=5;
         } break;
 
-        case 7:
+        case OP_MOV_7:
         {
             size_t reg1 = *(memory+pc+1);
             size_t reg2 = *(memory+pc+2);
@@ -108,7 +110,7 @@ void VMashine::execute()
             pc+=2;
         } break;
 
-        case 8:
+        case OP_MOV_8:
         {
             size_t reg = *(memory+pc+1);
             short addr = *((short*)(memory+pc+2));
@@ -116,7 +118,7 @@ void VMashine::execute()
             pc+=3;
         } break;
 
-        case 9:
+        case OP_MOV_9:
         {
             size_t reg1 = *(memory+pc+1);
             size_t reg2 = *(memory+pc+2);
@@ -125,7 +127,7 @@ void VMashine::execute()
             pc+=2;
         } break;
 
-        case 23:
+        case OP_ADD_2:
         {
             size_t reg1 = *(memory+pc+1);
             size_t reg2 = *(memory+pc+2);
@@ -148,23 +150,23 @@ void VMashine::interrupt(short code)
 {
     switch(code)
     {
-    case 10:
+    case INT_EXIT:
         exit = true;
         break;
 
-    case 11:
+    case INT_OUT:
         std::cout << regs[0] << std::endl;
         break;
 
-    case 12:
+    case INT_OUT_FLOAT:
         std::cout << regsFloat[0] << std::endl;
         break;
 
-    case 13:
+    case INT_IN:
         std::cin >> regs[0];
         break;
 
-    case 14:
+    case INT_IN_FLOAT:
         std::cin >> regsFloat[0];
         break;
 

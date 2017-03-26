@@ -1,0 +1,102 @@
+#pragma once
+
+enum
+{
+	OP_MOV_1 = 1,
+	OP_MOV_2,
+	OP_MOV_3,
+
+	OP_MOV_4,
+	OP_MOV_5,
+	OP_MOV_6,
+
+	OP_MOV_7,
+	OP_MOV_8,
+	OP_MOV_9,
+
+	OP_MOV_10,
+	OP_MOV_11,
+	OP_MOV_12,
+
+	OP_MOV_13,
+	OP_MOV_14,
+	OP_MOV_15,
+	OP_MOV_16,
+
+	OP_MOV_17,
+	OP_MOV_18,
+
+	OP_PASS,
+
+	OP_INT,
+
+	OP_ADD_1 = 22,
+	OP_ADD_2,
+	OP_ADD_3,
+	OP_ADD_4,
+
+	OP_SUB_1,
+	OP_SUB_2,
+	OP_SUB_3,
+	OP_SUB_4,
+
+	OP_MUL_1,
+	OP_MUL_2,
+	OP_MUL_3,
+	OP_MUL_4,
+
+	OP_DIV_1,
+	OP_DIV_2,
+	OP_DIV_3,
+	OP_DIV_4,
+
+	OP_JMP_1 = 40,
+	OP_JMP_2,
+	OP_JE_1,
+	OP_JE_2,
+	OP_JG_1,
+	OP_JG_2,
+	OP_JL_1,
+	OP_JL_2,
+	OP_JNE_1,
+	OP_JNE_2,
+
+	OP_CMP_1,
+	OP_CMP_2,
+	OP_CMP_3,
+	OP_CMP_4,
+
+	OP_PUSH_1 = 60,
+	OP_PUSH_2,
+	OP_PUSH_3,
+	OP_PUSH_4,
+
+	OP_POP_1 = 65,
+	OP_POP_2,
+
+	OP_CALL_1 = 70,
+	OP_CALL_2,
+	OP_RET = 75,
+
+	OP_AND_1,
+	OP_AND_2,
+	OP_OR_1,
+	OP_OR_2,
+	OP_XOR_1,
+	OP_XOR_2,
+	OP_NOT,
+	OP_MAX
+};
+
+enum
+{
+	INT_HALT = 10,
+	INT_OUT,
+	INT_OUT_FLOAT,
+	INT_IN,
+	INT_IN_FLOAT,
+	INT_OUT_TEXT,
+	INT_IN_TEXT,
+	INT_DUMP,
+	INT_OUT_TEXT_CR
+};
