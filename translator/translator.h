@@ -9,6 +9,7 @@
 #include <cstring>
 
 #include "../global/defines.h"
+#include "misc.h"
 
 const int MAXSIZE = 5000;
 
@@ -44,12 +45,9 @@ private:
 
 private:
     void initRegs();
-    void split(const std::string &str, std::vector<std::string> &args);
-    void error(int line, const std::string &msg);
+    
     void checkArgc(int needArgs, int curArgs);
 
-    bool isNumber(const std::string &str);
-    bool isFloat(const std::string &str);
     bool isRegister(const std::string &str);
     bool isFloatRegister(const std::string &str);
     bool isMemory(std::string &str);
