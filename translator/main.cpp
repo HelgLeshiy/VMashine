@@ -44,6 +44,7 @@ private:
     void initRegs();
     void split(const std::string &str, std::vector<std::string> &args);
     void error(int line, const std::string &msg);
+    void checkArgc(int needArgs, int curArgs);
 
     bool isNumber(const std::string &str);
     bool isFloat(const std::string &str);
@@ -112,6 +113,14 @@ void Translator::error(int line, const std::string &msg)
 {
     std::cerr << "\nError! Line " << line << ": " << msg << " \"" << tmp << "\"\n";
     exit(1);
+}
+
+void Translator::checkArgc(int needArgs, int curArgs)
+{
+    if(needArgs < curArgs)
+        error(curline, "Too few arguments");
+    else if(needArgs > curArgs)
+        error(curline, "Too many arguments");
 }
 
 bool Translator::isNumber(const std::string &str)
@@ -204,10 +213,10 @@ void Translator::putFloatRegister(const std::string &reg, int &cur)
     cur+=sizeof(unsigned char);
 }
 
+
 void Translator::cmdMov(std::vector<std::string> &args, int &cur)
 {
-    if(args.size() != 3)
-        error(curline, "Syntax error");
+    checkArgc(3, args.size());
 
     if(isNumber(args[1]))
     {
@@ -233,12 +242,12 @@ void Translator::cmdMov(std::vector<std::string> &args, int &cur)
             }
             else
             {
-                error(curline, "Syntax error");
+                error(curline, "Wrong second argument");
             }
         }
         else
         {
-            error(curline, "Syntax error");
+            error(curline, "Wrong second argument");
         }
     }
     else if(isFloat(args[1]))
@@ -265,12 +274,12 @@ void Translator::cmdMov(std::vector<std::string> &args, int &cur)
             }
             else
             {
-                error(curline, "Syntax error");
+                error(curline, "Wrong second argument");
             }
         }
         else
         {
-            error(curline, "Syntax error");
+            error(curline, "Wrong second argument");
         }
     }
     else if(isRegister(args[1]))
@@ -297,7 +306,7 @@ void Translator::cmdMov(std::vector<std::string> &args, int &cur)
             }
             else
             {
-                error(curline, "Syntax error");
+                error(curline, "Wrong second argument");
             }
         }
         else if(isFloatRegister(args[2]))
@@ -308,7 +317,7 @@ void Translator::cmdMov(std::vector<std::string> &args, int &cur)
         }
         else
         {
-            error(curline, "Syntax error");
+            error(curline, "Wrong second argument");
         }
     }
     else if(isFloatRegister(args[1]))
@@ -335,7 +344,7 @@ void Translator::cmdMov(std::vector<std::string> &args, int &cur)
             }
             else
             {
-                error(curline, "Syntax error");
+                error(curline, "Wrong second argument");
             }
         }
         else if(isRegister(args[2]))
@@ -346,7 +355,7 @@ void Translator::cmdMov(std::vector<std::string> &args, int &cur)
         }
         else
         {
-            error(curline, "Syntax error");
+            error(curline, "Wrong second argument");
         }
     }
     else if(isMemory(args[1]))
@@ -367,7 +376,7 @@ void Translator::cmdMov(std::vector<std::string> &args, int &cur)
             }
             else
             {
-                error(curline, "Syntax error");
+                error(curline, "Wrong second argument");
             }
         }
         else if(isRegister(args[1]))
@@ -386,17 +395,17 @@ void Translator::cmdMov(std::vector<std::string> &args, int &cur)
             }
             else
             {
-                error(curline, "Syntax error");
+                error(curline, "Wrong second argument");
             }
         }
         else
         {
-            error(curline, "Syntax error");
+            error(curline, "Wrong second argument");
         }
     }
     else
     {
-        error(curline, "Syntax error");
+        error(curline, "Wrong first argument");
     }
 }
 
@@ -407,11 +416,10 @@ void Translator::cmdPass(std::vector<std::string> &args, int &cur)
 
 void Translator::cmdInt(std::vector<std::string> &args, int &cur)
 {
-    if(args.size()!=2)
-        error(curline, "Syntax error");
+    checkArgc(2, args.size());
 
     if(!isNumber(args[1]))
-        error(curline, "Syntax error");
+        error(curline, "Wrong first argument");
 
     putByte(OP_INT, cur);
     putNumber(args[1], cur);
@@ -419,8 +427,7 @@ void Translator::cmdInt(std::vector<std::string> &args, int &cur)
 
 void Translator::cmdAdd(std::vector<std::string> &args, int &cur)
 {
-    if(args.size() != 3)
-        error(curline, "Syntax error");
+    checkArgc(3, args.size());
 
     if(isNumber(args[1]) && isRegister(args[2]))
     {
@@ -448,14 +455,13 @@ void Translator::cmdAdd(std::vector<std::string> &args, int &cur)
     }
     else
     {
-        error(curline, "Syntax error");
+        error(curline, "Wrong arguments");
     }
 }
 
 void Translator::cmdSub(std::vector<std::string> &args, int &cur)
 {
-    if(args.size() != 3)
-        error(curline, "Syntax error");
+    checkArgc(3, args.size());
 
     if(isNumber(args[1]) && isRegister(args[2]))
     {
@@ -483,14 +489,13 @@ void Translator::cmdSub(std::vector<std::string> &args, int &cur)
     }
     else
     {
-        error(curline, "Syntax error");
+        error(curline, "Wrong arguments");
     }
 }
 
 void Translator::cmdMul(std::vector<std::string> &args, int &cur)
 {
-    if(args.size() != 2)
-        error(curline, "Syntax error");
+    checkArgc(2, args.size());
 
     if(isNumber(args[1]))
     {
@@ -513,13 +518,12 @@ void Translator::cmdMul(std::vector<std::string> &args, int &cur)
         putFloatRegister(args[1], cur);
     }
     else
-        error(curline, "Syntax error");
+        error(curline, "Wrong first argument");
 }
 
 void Translator::cmdDiv(std::vector<std::string> &args, int &cur)
 {
-    if(args.size() != 2)
-        error(curline, "Syntax error");
+    checkArgc(2, args.size());
 
     if(isNumber(args[1]))
     {
@@ -542,13 +546,12 @@ void Translator::cmdDiv(std::vector<std::string> &args, int &cur)
         putFloatRegister(args[1], cur);
     }
     else
-        error(curline, "Syntax error");
+        error(curline, "Wrong first argument");
 }
 
 void Translator::cmdJmp(std::vector<std::string> &args, int &cur)
 {
-    if(args.size() != 2)
-        error(curline, "Syntax error");
+    checkArgc(2, args.size());
 
     if(isNumber(args[1]))
     {
@@ -556,13 +559,12 @@ void Translator::cmdJmp(std::vector<std::string> &args, int &cur)
         putNumber(args[1], cur);
     }
     else
-        error(curline, "Syntax error");
+        error(curline, "Wrong first argument");
 }
 
 void Translator::cmdJe(std::vector<std::string> &args, int &cur)
 {
-    if(args.size() != 2)
-        error(curline, "Syntax error");
+    checkArgc(2, args.size());
 
     if(isNumber(args[1]))
     {
@@ -570,13 +572,12 @@ void Translator::cmdJe(std::vector<std::string> &args, int &cur)
         putNumber(args[1], cur);
     }
     else
-        error(curline, "Syntax error");
+        error(curline, "Wrong first argument");
 }
 
 void Translator::cmdJg(std::vector<std::string> &args, int &cur)
 {
-    if(args.size() != 2)
-        error(curline, "Syntax error");
+    checkArgc(2, args.size());
 
     if(isNumber(args[1]))
     {
@@ -584,13 +585,12 @@ void Translator::cmdJg(std::vector<std::string> &args, int &cur)
         putNumber(args[1], cur);
     }
     else
-        error(curline, "Syntax error");
+        error(curline, "Wrong first argument");
 }
 
 void Translator::cmdJl(std::vector<std::string> &args, int &cur)
 {
-    if(args.size() != 2)
-        error(curline, "Syntax error");
+    checkArgc(2, args.size());
 
     if(isNumber(args[1]))
     {
@@ -598,13 +598,12 @@ void Translator::cmdJl(std::vector<std::string> &args, int &cur)
         putNumber(args[1], cur);
     }
     else
-        error(curline, "Syntax error");
+        error(curline, "Wrong first argument");
 }
 
 void Translator::cmdJne(std::vector<std::string> &args, int &cur)
 {
-    if(args.size() != 2)
-        error(curline, "Syntax error");
+    checkArgc(2, args.size());
 
     if(isNumber(args[1]))
     {
@@ -612,13 +611,12 @@ void Translator::cmdJne(std::vector<std::string> &args, int &cur)
         putNumber(args[1], cur);
     }
     else
-        error(curline, "Syntax error");
+        error(curline, "Wrong first argument");
 }
 
 void Translator::cmdCmp(std::vector<std::string> &args, int &cur)
 {
-    if(args.size() != 3)
-        error(curline, "Syntax error");
+    checkArgc(3, args.size());
 
     if(isNumber(args[1]) && isRegister(args[2]))
     {
@@ -645,47 +643,154 @@ void Translator::cmdCmp(std::vector<std::string> &args, int &cur)
         putFloatRegister(args[2], cur);
     }
     else
-        error(curline, "Syntax error");
+        error(curline, "Wrong arguments");
 }
 
 void Translator::cmdPush(std::vector<std::string> &args, int &cur)
 {
+    checkArgc(2, args.size());
 
+    if(isNumber(args[1]))
+    {
+        putByte(OP_PUSH_1, cur);
+        putNumber(args[1], cur);
+    }
+    else if(isRegister(args[1]))
+    {
+        putByte(OP_PUSH_2, cur);
+        putRegister(args[1], cur);
+    }
+    else if(isFloat(args[1]))
+    {
+        putByte(OP_PUSH_3, cur);
+        putFloat(args[1], cur);
+    }
+    else if(isFloatRegister(args[1]))
+    {
+        putByte(OP_PUSH_4, cur);
+        putFloatRegister(args[1], cur);
+    }
+    else
+        error(curline, "Wrong first argument");
 }
 
 void Translator::cmdPop(std::vector<std::string> &args, int &cur)
 {
+    checkArgc(2, args.size());
 
+    if(isRegister(args[1]))
+    {
+        putByte(OP_POP_1, cur);
+        putRegister(args[1], cur);
+    }
+    else if(isFloatRegister(args[1]))
+    {
+        putByte(OP_POP_2, cur);
+        putFloatRegister(args[1], cur);
+    }
+    else
+        error(curline, "Wrong first argument");
 }
 
 void Translator::cmdCall(std::vector<std::string> &args, int &cur)
 {
+    checkArgc(2, args.size());
 
+    if(isMemory(args[1]))
+    {
+        if(isNumber(args[1]))
+        {
+            putByte(OP_CALL_1, cur);
+            putNumber(args[1], cur);
+        }
+        else if(isRegister(args[1]))
+        {
+            putByte(OP_CALL_2, cur);
+            putRegister(args[1], cur);
+        }
+        else
+            error(curline, "Wrong first argument");
+    }
+    else
+        error(curline, "Wrong first argument");
 }
 
 void Translator::cmdRet(std::vector<std::string> &args, int &cur)
 {
-
+    putByte(OP_RET, cur);
 }
 
 void Translator::cmdAnd(std::vector<std::string> &args, int &cur)
 {
+    checkArgc(3, args.size());
 
+    if(isNumber(args[1]) && isRegister(args[2]))
+    {
+        putByte(OP_AND_1, cur);
+        putNumber(args[1], cur);
+        putRegister(args[2], cur);
+    }
+    else if(isRegister(args[1]) && isRegister(args[2]))
+    {
+        putByte(OP_AND_2, cur);
+        putRegister(args[1], cur);
+        putRegister(args[2], cur);
+    }
+    else
+        error(curline, "Wrong arguments");
 }
 
 void Translator::cmdOr(std::vector<std::string> &args, int &cur)
 {
+    checkArgc(3, args.size());
 
+    if(isNumber(args[1]) && isRegister(args[2]))
+    {
+        putByte(OP_OR_1, cur);
+        putNumber(args[1], cur);
+        putRegister(args[2], cur);
+    }
+    else if(isRegister(args[1]) && isRegister(args[2]))
+    {
+        putByte(OP_OR_2, cur);
+        putRegister(args[1], cur);
+        putRegister(args[2], cur);
+    }
+    else
+        error(curline, "Wrong arguments");
 }
 
 void Translator::cmdXor(std::vector<std::string> &args, int &cur)
 {
+    checkArgc(3, args.size());
 
+    if(isNumber(args[1]) && isRegister(args[2]))
+    {
+        putByte(OP_XOR_1, cur);
+        putNumber(args[1], cur);
+        putRegister(args[2], cur);
+    }
+    else if(isRegister(args[1]) && isRegister(args[2]))
+    {
+        putByte(OP_XOR_2, cur);
+        putRegister(args[1], cur);
+        putRegister(args[2], cur);
+    }
+    else
+        error(curline, "Wrong arguments");
 }
 
 void Translator::cmdNot(std::vector<std::string> &args, int &cur)
 {
+    checkArgc(2, args.size());
 
+    if(isRegister(args[1]))
+    {
+        putByte(OP_NOT, cur);
+        putRegister(args[1], cur);
+    }
+    else
+        error(curline, "Wrong arguments");
 }
 
 
